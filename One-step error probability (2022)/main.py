@@ -9,7 +9,6 @@ def sgn(x: np.ndarray) -> np.ndarray:
     Perorm sgn(x) on the input. sgn(x) = +1 if x >= 0 and -1 if x < 0
     """
     sgn_value = np.sign(x)
-
     # Numpys sign function sets the output to 0 for x == 0. Correct for this
     sgn_value[sgn_value == 0] = 1
     return sgn_value
@@ -23,13 +22,14 @@ def random_pattern(N: int) -> np.ndarray:
     return np.random.choice([-1, 1], size=(N, 1))
 
 
-def hebbs_rule(patterns: list[np.ndarray]) -> np.ndarray:
+def hebbs_rule(patterns: list[np.ndarray], zero_diagonal: bool = True) -> np.ndarray:
     """
     Create the weight matrix W for a Hopfiled network using Hebb's rule. 
     This implementation sets the diagonal elements to zero
 
     Args:
         patterns: The patterns to store in the network
+        zero_diagonal: If the diagonal elements in the weight matrix should be set to zero
     
     Returns:
         A squrare matrix with a side lenght equal to the length of the patterns
@@ -43,7 +43,8 @@ def hebbs_rule(patterns: list[np.ndarray]) -> np.ndarray:
         weights += np.matmul(x, x.T)
 
     # Set the diagonal to 0
-    np.fill_diagonal(weights, 0)
+    if zero_diagonal:
+        np.fill_diagonal(weights, 0)
 
     # Return the weights after normalizing
     return weights / N
@@ -66,13 +67,14 @@ def asynchronous_update(state: np.ndarray, weights: np.ndarray, i: int) -> np.nd
     return state_tmp
 
 
-def error_trial(N: int, p: int) -> int:
+def error_trial(N: int, p: int, zero_diagonal: bool) -> int:
     """
     Do one independent trial too estimate the one-step error probability. 
 
     Args:
         N: Number of bits in the patterns
         p: Number of patterns
+        zero_diagonal: If the diagonal elements in the weight matrix should be set to zero
     
     Returns:
         Number of errors (0 or 1)
@@ -93,20 +95,23 @@ def error_trial(N: int, p: int) -> int:
 
 
 if __name__ == '__main__':
+    # Settings
     N = 120
     Ps = [12,24,48,70,100,120]
     samples = 100_000
+    zero_diagonal = False
+
+    # Run the trials and record the one-step error probability
     p_error = []
     for p in Ps:
         errors = 0
         print(f"\nEstimating one-step error probability with N = {N} and p = {p}")
         for _ in tqdm(range(samples)):
-            errors += error_trial(N, p)
+            errors += error_trial(N, p, zero_diagonal)
         one_step_error_prob = errors / samples
         print(f"One-step error probability estimeted to {one_step_error_prob: .04f} for N = {N} and p = {p}")
         p_error.append(one_step_error_prob)
+    
+    # Print result
     print(f"Single-step error probability: {p_error}")
     print(f"For the N = {N} and p = {Ps}")
-        
-
-
