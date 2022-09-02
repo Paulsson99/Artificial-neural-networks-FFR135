@@ -101,14 +101,16 @@ def decode_state(s: np.ndarray, stored_patterns: list[np.ndarray]) -> int:
 if __name__ == '__main__':
     # Setup
     patterns = [np.reshape(x1, (-1, 1)), np.reshape(x2, (-1, 1)), np.reshape(x3, (-1, 1)), np.reshape(x4, (-1, 1)), np.reshape(x5, (-1, 1))]
-    initial_state = np.reshape(s03, (-1, 1))
     W = hebbs_rule(patterns, zero_diagonal=True)
 
-    # Run the network until it converges
-    steady_state = update_until_steady_state(initial_state, W)
+    for s in [s01, s02, s03]:
+        initial_state = np.reshape(s, (-1, 1))
 
-    # Decode the output
-    print(f"The pattern converged to the state {decode_state(steady_state, patterns)}")
-    # Reshape to correct format again
-    steady_state.shape = s01.shape
-    print(steady_state.tolist())
+        # Run the network until it converges
+        steady_state = update_until_steady_state(initial_state, W)
+
+        # Decode the output
+        print(f"\nThe pattern converged to the state {decode_state(steady_state, patterns)}")
+        # Reshape to correct format again
+        steady_state.shape = s01.shape
+        print(steady_state)
