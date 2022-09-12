@@ -131,3 +131,6 @@ dmypy.json
 
 # Ignore MacOs stuff
 .DS_Store
+
+# Ignore VS Code stuff
+.vscode/*
