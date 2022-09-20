@@ -58,14 +58,10 @@ def train_model(inputs: np.ndarray, targets: int, generations: int, learning_rat
     bias = 0
 
     for _ in range(generations):
-        dw = np.zeros_like(weights)
-        db = 0
         for x, t in zip(inputs, targets):
             output = run_model(x, weights, bias)
-            dw += learning_rate * (t - output) * x
-            db += learning_rate * (t - output)
-        weights += dw
-        bias -= db
+            weights += learning_rate * (t - output) * x
+            bias -= learning_rate * (t - output)
 
     return weights, bias
 
