@@ -8,10 +8,10 @@ from network import Network
 
 
 # Constants
-M = 100
-EPOCHS = 1000
-BATCH_SIZE = 10
-LEARNING_RATE = 0.3
+M = 75
+EPOCHS = 500
+BATCH_SIZE = 20
+LEARNING_RATE = 0.1
 
 
 def read_data() -> tuple[np.ndarray]:
@@ -101,7 +101,7 @@ def main():
         training_loss = nn.loss(training_x, training_t)
         validation_loss = nn.loss(validation_x, validation_t)
         training_error = nn.classification_error(training_x, training_t)
-        validation_error = nn.classification_error(training_x, training_t)
+        validation_error = nn.classification_error(validation_x, validation_t)
 
         # Save the weights that gives the smalest validation error
         if validation_error < best_validation_error:

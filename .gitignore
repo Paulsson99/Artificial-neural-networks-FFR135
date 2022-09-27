@@ -134,3 +134,7 @@ dmypy.json
 
 # Ignore VS Code stuff
 .vscode/*
+
+# Ignore numpy data files
+*.npy
+*.npz
