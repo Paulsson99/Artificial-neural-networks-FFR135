@@ -1,40 +1,36 @@
+from operator import mod
 import os
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt
-from tqdm import trange
-
-from network import Network
 
 
-EPOCHS = 100
-BATCH_SIZE = 100
-LEARNING_RATE = 0.05
+# Turn of some logs from tensorflow
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+
+# Constants
+EPOCHS = 5
+BATCH_SIZE = 32
 
 
 def load_mnist_data_to_classify() -> np.ndarray:
     """
     Load the data downloaded from CANVAS
     """
-    return np.moveaxis(np.load('xTest2.npy'), -1, 0).reshape(10_000, 784)
+    return np.moveaxis(np.load('xTest2.npy'), -1, 0).reshape(-1, 28, 28, 1) / 255.0
 
 
-def load_training_data() -> tuple[tuple[np.ndarray]]:
+def load_training_data(add_extra_dim: bool = False) -> tuple[tuple[np.ndarray]]:
     """
-    Load the training data
+    Load the training data and normalize it
     """
-    with np.load('mnist.npz') as f:
-        x_train, y_train = f['x_train'].reshape(60_000, 784), f['y_train']
-        x_test, y_test = f['x_test'].reshape(10_000, 784), f['y_test']
-        return (x_train, vectorize_target(y_train), y_train), (x_test, vectorize_target(y_test), y_test)
-
-
-def vectorize_target(y: np.ndarray) -> np.ndarray:
-    """
-    Convert the target to a one-hot vector
-    """
-    onehot = np.zeros((y.size, 10))
-    onehot[np.arange(y.size), y] = 1
-    return onehot
+    mnist = tf.keras.datasets.mnist
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    x_train, x_test = x_train / 255.0, x_test / 255.0
+    x_train = x_train.reshape(-1, 28, 28, 1)
+    x_test = x_test.reshape(-1, 28, 28, 1)
+    return (x_train, y_train), (x_test, y_test)
 
 
 def display_digit(digit: np.ndarray) -> None:
@@ -45,81 +41,94 @@ def display_digit(digit: np.ndarray) -> None:
     plt.show()
 
 
-def update_line(line, x, y):
-    line.set_xdata(np.append(line.get_xdata(), x))
-    line.set_ydata(np.append(line.get_ydata(), y))
-    line.get_figure().canvas.draw()
+def flat_model(hidden_layers: list[int], dropout_rate: float = 0.2) -> tf.keras.Model:
+    """
+    Return a regular deep network
+    """
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Flatten(input_shape=(28, 28, 1)))
+    for l in hidden_layers:
+        model.add(tf.keras.layers.Dense(l, activation='relu'))
+        model.add(tf.keras.layers.Dropout(dropout_rate))
+    model.add(tf.keras.layers.Dense(10))
+    return model
+
+
+def convolution_model(hidden_layers: list[int], dropout_rate: float = 0.2):
+    """
+    Return a network using convolution
+    """
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu'))
+    model.add(tf.keras.layers.MaxPool2D((2, 2)))
+    model.add(tf.keras.layers.Dropout(dropout_rate))
+    model.add(tf.keras.layers.Flatten())
+    for l in hidden_layers:
+        model.add(tf.keras.layers.Dense(l, activation='relu'))
+        model.add(tf.keras.layers.Dropout(dropout_rate))
+    model.add(tf.keras.layers.Dense(10))
+    return model
 
 
 def main():
     # Load the training data
-    (x_train, y_train, labels_train), (x_test, y_test, labels_test) = load_training_data()
+    (x_train, y_train), (x_test, y_test) = load_training_data()
 
-    # Setup plot
-    plt.ion()
-    fig, ax = plt.subplots()
-    training_loss_line, = ax.plot([], [], '-', label='Training loss')
-    validation_loss_line, = ax.plot([], [], label='Validation loss')
-    training_error_line, = ax.plot([], [], '-', label='Training error')
-    validation_error_line, = ax.plot([], [], label='Validation error')
-    ax.legend()
-    ax.set_xlim(1, EPOCHS)
-    ax.set_ylim(0, 0.5)
+    # Setup the model
+    model = convolution_model([64])
+    loss_func = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+    model.compile(
+        optimizer='adam',
+        loss=loss_func,
+        metrics=['accuracy']
+    )
+    probability_model = tf.keras.Sequential([
+        model,
+        tf.keras.layers.Softmax()
+    ])
 
-    # Setup the network
-    nn = Network([784, 200, 50, 10])
-
-    training_samples = x_train.shape[0]
-
-    for epoch in trange(EPOCHS):
-
-        # Train
-        for batch in range(training_samples // BATCH_SIZE):
-            batch_index = np.random.choice(training_samples, BATCH_SIZE, replace=False)
-            nn.backpropagation(x_train[batch_index], y_train[batch_index], lr=LEARNING_RATE)
-
-        # Calculate loss and classification error
-        training_loss = nn.loss(x_train, y_train)
-        validation_loss = nn.loss(x_test, y_test)
-        training_error = nn.classification_error(x_train, labels_train)
-        validation_error = nn.classification_error(x_test, labels_test)
-
-        # Quit the program if the figure is closed
-        if not plt.fignum_exists(fig.number):
-            print("Training aborted")
-            break
-        
-        # Update the figure
-        update_line(training_error_line, epoch + 1, training_error)
-        update_line(validation_error_line, epoch + 1, validation_error)
-        update_line(training_loss_line, epoch + 1, training_loss)
-        update_line(validation_loss_line, epoch + 1, validation_loss)
-        plt.pause(0.1)
+    # Train and evaluate
+    model.fit(x_train, y_train, epochs=EPOCHS, batch_size=BATCH_SIZE, use_multiprocessing=True)
+    model.evaluate(x_test, y_test, verbose=2)
     
     # Classify the data from CANVAS
     x = load_mnist_data_to_classify()
-    np.savetxt('classifications.csv', nn.classify(x), delimiter=',', fmt='%d')
+    predictions = probability_model(x)
+    clasifications = tf.argmax(predictions, axis=1).numpy()
+    np.savetxt('classifications.csv', clasifications, delimiter=',', fmt='%d')
 
-    plt.ioff()
+
+def check_result(rows: int, cols: int):
+    """
+    Open a figure with rows*cols randomly chosen digits so the user can see if the network has learned anything
+    """
+    x = load_mnist_data_to_classify()
+    classifications = np.loadtxt('classifications.csv', delimiter=',', dtype=int)
+    rand_index = np.random.choice(classifications.shape[0], size=rows * cols, replace=False)
+    fig, axes = plt.subplots(rows, cols)
+    fig.set_size_inches(cols, rows)
+    for row in range(rows):
+        for col in range(cols):
+            ax = axes[row][col]
+            i = rand_index[row * cols + col]
+            ax.imshow(x[i], cmap='gray')
+            ax.set_title(classifications[i])
+            ax.set_axis_off()
+
+    plt.subplots_adjust(
+        left=0.0,
+        right=1.0,
+        top=0.95,
+        bottom=0.05,
+        wspace=0.1,
+        hspace=0.8
+    )
     plt.show()
-
-
-def check_result():
-    with open('classifications.csv', 'r') as f:
-        x = load_mnist_data_to_classify()
-        i = 0
-        for line in f:
-            print(line.strip())
-            display_digit(x[i])
-            if i > 20:
-                break
-            i += 1
-
 
 
 if __name__ == '__main__':
     # To read data correctly
     os.chdir(os.path.dirname(__file__))
 
-    # main()
-    check_result()
+    main()
+    check_result(rows=10, cols=18)
