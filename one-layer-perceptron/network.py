@@ -19,7 +19,7 @@ class TangensHyperbolicus:
 class Network:
     """
     A deep neural network
-    It uses the sgn function for activation
+    It uses the tanh function for activation
     """
 
     def __init__(self, layers: list[int]):

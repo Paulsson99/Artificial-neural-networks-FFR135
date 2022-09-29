@@ -24,7 +24,6 @@ def read_data() -> tuple[np.ndarray]:
     training_x, training_t = training_data[:,:2], training_data[:,-1]
     validation_x, validation_t = validation_data[:,:2], validation_data[:,-1]
 
-    # Add an extra dimension to the data so it will be 2D when iterating over it
     return training_x, training_t, validation_x, validation_t
 
 
@@ -55,6 +54,7 @@ def plot_data():
     plt.scatter(coord[:,0], coord[:,1], c=colors)
     plt.show()
 
+
 def update_line(line, x, y):
     line.set_xdata(np.append(line.get_xdata(), x))
     line.set_ydata(np.append(line.get_ydata(), y))
@@ -70,7 +70,6 @@ def main():
 
     print(f'Shifting data with {shift}. Scaling with {scale}')
     
-
     # Setup plot
     plt.ion()
     fig, ax = plt.subplots()
@@ -91,7 +90,6 @@ def main():
     training_samples = training_x.shape[0]
 
     for epoch in trange(EPOCHS):
-
         # Train
         for _ in range(training_samples // BATCH_SIZE):
             batch_index = np.random.choice(training_samples, BATCH_SIZE, replace=False)
