@@ -32,11 +32,12 @@ def load_training_data(add_extra_dim: bool = False) -> tuple[tuple[np.ndarray]]:
     return (x_train, y_train), (x_test, y_test)
 
 
-def display_digit(digit: np.ndarray) -> None:
+def display_digit(digit: np.ndarray, guess: int) -> None:
     """
     Display a digit
     """
     plt.imshow(digit.reshape((28, 28)), cmap='gray')
+    plt.title(guess)
     plt.show()
 
 
@@ -119,15 +120,15 @@ def check_known_hard_lines():
     """
     x = load_mnist_data_to_classify()
     classifications = np.loadtxt('classifications.csv', delimiter=',', dtype=int)
-    hard_img = [35, 228, 331, 339, 381, 491, 699, 711, 757, 785, 826, 891, 1027, 1029]
+    hard_img = [35, 228, 331, 339, 381, 491, 546, 699, 701, 711, 757, 785, 826, 891, 889, 913, 1027, 1029]
     for i in hard_img:
-        print(classifications[i])
-        display_digit(x[i])
+        display_digit(x[i], classifications[i])
 
 
 if __name__ == '__main__':
     # To read data correctly
     os.chdir(os.path.dirname(__file__))
 
-    main()
-    check_result(rows=10, cols=18)
+    # main()
+    # check_result(rows=10, cols=18)
+    check_known_hard_lines()
