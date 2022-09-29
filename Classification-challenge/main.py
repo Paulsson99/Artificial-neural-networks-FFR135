@@ -40,19 +40,6 @@ def display_digit(digit: np.ndarray) -> None:
     plt.show()
 
 
-def flat_model(hidden_layers: list[int], dropout_rate: float = 0.2) -> tf.keras.Model:
-    """
-    Return a regular deep network
-    """
-    model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Flatten(input_shape=(28, 28, 1)))
-    for l in hidden_layers:
-        model.add(tf.keras.layers.Dense(l, activation='relu'))
-        model.add(tf.keras.layers.Dropout(dropout_rate))
-    model.add(tf.keras.layers.Dense(10))
-    return model
-
-
 def convolution_model(hidden_layers: list[int], dropout_rate: float = 0.2):
     """
     Return a network using convolution
@@ -128,7 +115,7 @@ def check_result(rows: int, cols: int):
 def check_known_hard_lines():
     """
     Check how well the network performes on some 'hard' images. 
-    A hard image is here an image is here an image that diffrent networks gives different results
+    A hard image is here an image that diffrent networks gives different results for
     """
     x = load_mnist_data_to_classify()
     classifications = np.loadtxt('classifications.csv', delimiter=',', dtype=int)
