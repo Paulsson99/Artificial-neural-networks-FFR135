@@ -1,5 +1,3 @@
-from cProfile import label
-from math import floor
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
@@ -77,7 +75,7 @@ def upperKullbackLeiblerDivergence(N: int, M: np.ndarray) -> np.ndarray:
     mask = M < 2**(N - 1) - 1
     m = M[mask] + 1.0
     print(m)
-    m = N - np.floor(np.log2(m)) - m / (2**np.log2(m))
+    m = N - np.floor(np.log2(m)) - m / (2**np.floor(np.log2(m)))
     print(m)
     d_kl[mask] = np.log(2) * m
     print(m)
