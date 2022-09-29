@@ -129,6 +129,6 @@ if __name__ == '__main__':
     # To read data correctly
     os.chdir(os.path.dirname(__file__))
 
-    # main()
-    # check_result(rows=10, cols=18)
+    main()
+    check_result(rows=10, cols=18)
     check_known_hard_lines()
