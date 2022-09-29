@@ -10,7 +10,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 # Constants
-EPOCHS = 5
+EPOCHS = 10
 BATCH_SIZE = 32
 
 
@@ -75,7 +75,7 @@ def main():
     (x_train, y_train), (x_test, y_test) = load_training_data()
 
     # Setup the model
-    model = convolution_model([64])
+    model = convolution_model([64, 64])
     loss_func = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     model.compile(
         optimizer='adam',
@@ -124,6 +124,19 @@ def check_result(rows: int, cols: int):
         hspace=0.8
     )
     plt.show()
+
+
+def check_known_hard_lines():
+    """
+    Check how well the network performes on some 'hard' images. 
+    A hard image is here an image is here an image that diffrent networks gives different results
+    """
+    x = load_mnist_data_to_classify()
+    classifications = np.loadtxt('classifications.csv', delimiter=',', dtype=int)
+    hard_img = [35, 228, 331, 339, 381, 491, 699, 711, 757, 785, 826, 891, 1027, 1029]
+    for i in hard_img:
+        print(classifications[i])
+        display_digit(x[i])
 
 
 if __name__ == '__main__':
