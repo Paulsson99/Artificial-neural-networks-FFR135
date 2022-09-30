@@ -1,4 +1,3 @@
-from cProfile import label
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
@@ -10,12 +9,12 @@ from boltzmann import BoltzmannMachine
 plt.rcParams['text.usetex'] = True
 
 # Constants
-EPOCHS = 500
+EPOCHS = 1000
 BATCH_SIZE = 32
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.05
 CD_K = 100
 AVERAGES = 20
-SAMPLING_STEPS = 10_000
+SAMPLING_STEPS = 3000
 
 
 def train_XOR(M: int) -> float:
@@ -36,10 +35,10 @@ def train_XOR(M: int) -> float:
 
     # Sample the data distrubution for the model
     frequenzy_table = {i: 0 for i in range(8)}
-    for _ in range(1000):
-        bm.update() # Remove initial transient
-    for _ in range(SAMPLING_STEPS):
-        bm.update()
+    for _ in trange(SAMPLING_STEPS, desc=f"Sampling distrubution for {M} hidden neurons", leave=False):
+        bm.initialize_network(np.random.choice([-1, 1], size=3, replace=True))
+        for _ in range(CD_K):
+            bm.update()
         frequenzy_table[hash_state(bm.visable)] += 1
 
     # Sample the Kullback-Leibler divergence (only need the XOR data as all other have probability zero -> vanish in D_KL sum)
@@ -79,8 +78,7 @@ def main():
         kullback_leibler_samples[i,:] = np.array([train_XOR(m) for m in M])
 
     kullback_leibler_mean = np.mean(kullback_leibler_samples, axis=0)
-
-    plt.scatter(np.repeat(M, AVERAGES, axis=0), kullback_leibler_samples, marker='x',
+    plt.scatter(np.repeat(M[np.newaxis,:], AVERAGES, axis=0), kullback_leibler_samples, marker='x',
      label="Samples from the trained Boltzmann Machine")
     plt.plot(M, kullback_leibler_mean, label=f"Average over {AVERAGES} samples")
     plt.plot(M, upperKullbackLeiblerDivergence(N=3, M=M), label="Theoretical upper bound")
