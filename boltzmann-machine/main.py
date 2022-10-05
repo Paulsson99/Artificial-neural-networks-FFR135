@@ -73,15 +73,15 @@ def upperKullbackLeiblerDivergence(N: int, M: np.ndarray) -> np.ndarray:
 def main():
     M = np.array([1, 2, 4, 8])
 
-    kullback_leibler_samples = np.zeros((AVERAGES, 4))
-    for i in trange(AVERAGES, desc="Calculating the average of the Kullback-Leibler divergence"):
+    kullback_leibler_samples = np.zeros((AVERAGES, len(M)))
+    for i in trange(AVERAGES, desc="Calculating samples of the Kullback-Leibler divergence"):
         kullback_leibler_samples[i,:] = np.array([train_XOR(m) for m in M])
 
-    kullback_leibler_mean = np.mean(kullback_leibler_samples, axis=0)
-    plt.scatter(np.repeat(M[np.newaxis,:], AVERAGES, axis=0), kullback_leibler_samples, marker='x',
-     label="Samples from the trained Boltzmann Machine")
-    plt.plot(M, kullback_leibler_mean, label=f"Average over {AVERAGES} samples")
-    plt.plot(M, upperKullbackLeiblerDivergence(N=3, M=M), label="Theoretical upper bound")
+    kullback_leibler_min = np.min(kullback_leibler_samples, axis=0)
+    print(kullback_leibler_samples)
+    print(kullback_leibler_min)
+    plt.plot(M, kullback_leibler_min, label=f"Minimum found over {AVERAGES} samples", marker='o', linestyle='--')
+    plt.plot(M, upperKullbackLeiblerDivergence(N=3, M=M), label="Theoretical upper bound", marker='D', linestyle='--')
     plt.legend()
     plt.xlabel(r"$M$")
     plt.ylabel(r"$D_\textrm{KL}$")
