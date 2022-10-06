@@ -13,7 +13,7 @@ EPOCHS = 1000
 BATCH_SIZE = 32
 LEARNING_RATE = 0.05
 CD_K = 100
-AVERAGES = 20
+SAMPLES = 20
 SAMPLING_STEPS = 3000
 
 
@@ -73,14 +73,12 @@ def upperKullbackLeiblerDivergence(N: int, M: np.ndarray) -> np.ndarray:
 def main():
     M = np.array([1, 2, 4, 8])
 
-    kullback_leibler_samples = np.zeros((AVERAGES, len(M)))
-    for i in trange(AVERAGES, desc="Calculating samples of the Kullback-Leibler divergence"):
+    kullback_leibler_samples = np.zeros((SAMPLES, len(M)))
+    for i in trange(SAMPLES, desc="Calculating samples of the Kullback-Leibler divergence"):
         kullback_leibler_samples[i,:] = np.array([train_XOR(m) for m in M])
 
     kullback_leibler_min = np.min(kullback_leibler_samples, axis=0)
-    print(kullback_leibler_samples)
-    print(kullback_leibler_min)
-    plt.plot(M, kullback_leibler_min, label=f"Minimum found over {AVERAGES} samples", marker='o', linestyle='--')
+    plt.plot(M, kullback_leibler_min, label=f"Minimum found over {SAMPLES} samples", marker='o', linestyle='--')
     plt.plot(M, upperKullbackLeiblerDivergence(N=3, M=M), label="Theoretical upper bound", marker='D', linestyle='--')
     plt.legend()
     plt.xlabel(r"$M$")
