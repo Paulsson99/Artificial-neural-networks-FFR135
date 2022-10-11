@@ -1,3 +1,4 @@
+from select import select
 import numpy as np
 
 
@@ -18,7 +19,7 @@ class TicTacToe:
         self.reset()
 
     def reset(self) -> None:
-        self.board = np.zeros((3, 3))
+        self.board = np.zeros((3, 3), dtype=int)
 
     def play(self, move: tuple[int, int], player: int) -> int:
         """
@@ -52,7 +53,14 @@ class TicTacToe:
             return -1
         else:
             return 0
-
+    
+    def game_over(self):
+        """
+        Check if the game is over
+        """
+        if np.count_nonzero(self.board) == 9:
+            return True
+        return self.winner() != 0
     
     def __str__(self) -> str:
         """
@@ -61,15 +69,3 @@ class TicTacToe:
         game_char = { 0: ' ', 1: 'X', -1: 'O' }
         rows = [' | '.join(game_char[x] for x in row) for row in self.board]
         return ' ' + f' \n{"-" * 11}\n '.join(rows) + ' '
-
-
-if __name__ == '__main__':
-    ttt = TicTacToe()
-
-    ttt.play((0, 0), -1)
-    ttt.play((0, 1), -1)
-    ttt.play((0, 2), -1)
-    ttt.play((1, 1), 1)
-    ttt.play((2, 2), 1)
-
-    print(ttt)

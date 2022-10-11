@@ -138,3 +138,6 @@ dmypy.json
 # Ignore numpy data files
 *.npy
 *.npz
+
+# Ignore csv data files
+*.csv
