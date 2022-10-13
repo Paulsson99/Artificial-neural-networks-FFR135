@@ -2,7 +2,6 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
 
 from reservoir import ReservoirComputer
 
@@ -43,13 +42,7 @@ def main():
     # Plot the solution
     ax = plot_3D_time_series(X_test, color='b')
     plot_3D_time_series(O, color='r', ax=ax)
-
-    # plt.plot(np.arange(O.shape[1]), O[1,:], label='Prediction')
-    # plt.plot(np.arange(O.shape[1]), X_train[1,1500:2000], label='Data')
-
-    # plt.legend()
     plt.show()
-
 
 
 if __name__ == '__main__':

@@ -7,11 +7,10 @@ import matplotlib.pyplot as plt
 from map import SelfOrganisingMap
 
 
-alpha = 1.0
 color_map = {
-    0.0: (1.0, 0.0, 0.0, alpha),    # Red
-    1.0: (0.0, 1.0, 0.0, alpha),    # Green
-    2.0: (0.0, 0.0, 1.0, alpha),    # Blue
+    0.0: (1.0, 0.0, 0.0, 1.0),    # Red
+    1.0: (0.0, 1.0, 0.0, 1.0),    # Green
+    2.0: (0.0, 0.0, 1.0, 1.0),    # Blue
 }
 
 
@@ -61,12 +60,11 @@ def train(som: SelfOrganisingMap, data: np.ndarray, epochs: int):
 
 def main():
     output_shape = (40, 40)
-    epochs = 10
+    epochs = 100
 
     # Load and preprocess data
     iris_data = read_data('iris-data.csv')
     iris_labels = read_data('iris-labels.csv')
-
     iris_data = preprocessing(iris_data)
 
     som = SelfOrganisingMap(4, output_shape)

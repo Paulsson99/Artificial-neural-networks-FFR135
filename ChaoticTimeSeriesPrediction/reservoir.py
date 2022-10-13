@@ -28,8 +28,8 @@ class ReservoirComputer:
             reservoir[:,t + 1] = np.tanh(self.w @ reservoir[:,t] + self.w_in @ X[:,t])
 
         # Remove initial transient
-        reservoir = reservoir[:,501:]
-        Y = Y[:,500:]
+        reservoir = reservoir[:,51:]
+        Y = Y[:,50:]
 
         # Calculate the output weights with ridge regression
         # self.w_out = np.linalg.inv(reservoir.T @ reservoir + k * np.eye(self.reservoir_size)) @ reservoir.T @ Y

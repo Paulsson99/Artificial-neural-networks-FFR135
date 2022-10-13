@@ -35,8 +35,3 @@ class SelfOrganisingMap:
             for j in range(self.output_shape[1]):
                 dw[i,j,:] = lr * self.h((i, j), i0, sigma) * (x - self.w[i,j,:])
         self.w += dw
-
-
-if __name__ == '__main__':
-    som = SelfOrganisingMap(2, (4, 4))
-    print(som.run(np.array([2, 1])))
