@@ -23,14 +23,17 @@ class ReservoirComputer:
         """
         # Generate the hidden reservoir for all timesteps in the training data
         T = X.shape[1]
-        reservoir = np.zeros((T, self.reservoir_size))
-        for t in range(1, T):
-            reservoir[t,:] = np.tanh(self.w @ reservoir[t-1,:] + self.w_in @ X[:,t-1])
+        reservoir = np.zeros((self.reservoir_size, T + 1))
+        for t in range(0, T):
+            reservoir[:,t + 1] = np.tanh(self.w @ reservoir[:,t] + self.w_in @ X[:,t])
+
+        # Remove initial transient
+        reservoir = reservoir[:,501:]
+        Y = Y[:,500:]
 
         # Calculate the output weights with ridge regression
-        for i in range(self.outputs):
-            y = Y[i,:]
-            self.w_out[i,:] = np.linalg.inv(reservoir.T @ reservoir + k * np.eye(self.reservoir_size)) @ reservoir.T @ y
+        # self.w_out = np.linalg.inv(reservoir.T @ reservoir + k * np.eye(self.reservoir_size)) @ reservoir.T @ Y
+        self.w_out = Y @ reservoir.T @ np.linalg.inv(reservoir @ reservoir.T + k * np.eye(self.reservoir_size))
 
     def dynamics(self, X: np.ndarray, T: int) -> np.ndarray:
         """

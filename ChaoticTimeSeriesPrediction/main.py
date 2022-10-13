@@ -31,21 +31,25 @@ def main():
 
     # Load training data and train the reservoir computer
     X_train = read_data('training-set.csv')
-    reservoirComputer.train(X=X_train[:,:-1], Y=X_train[:,1:], k=0.001)
-
+    reservoirComputer.train(X=X_train[:,:-1], Y=X_train[:,1:], k=0.01)
     
     # Load test data and generate the continuation
     X_test = read_data('test-set-7.csv')
     O = reservoirComputer.dynamics(X_test, T=500)
 
+    # Save the y component of the result
+    np.savetxt('prediction.csv', O[1,:], delimiter=',')
+    
     # Plot the solution
     ax = plot_3D_time_series(X_test, color='b')
     plot_3D_time_series(O, color='r', ax=ax)
 
+    # plt.plot(np.arange(O.shape[1]), O[1,:], label='Prediction')
+    # plt.plot(np.arange(O.shape[1]), X_train[1,1500:2000], label='Data')
+
+    # plt.legend()
     plt.show()
 
-    # Save the y component of the result
-    np.savetxt('prediction.csv', O[1,:], delimiter=',')
 
 
 if __name__ == '__main__':

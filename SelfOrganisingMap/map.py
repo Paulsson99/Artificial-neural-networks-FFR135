@@ -14,8 +14,8 @@ class SelfOrganisingMap:
         """
         Map the input x to the location of the best neuron
         """
-        output = np.dot(self.w, x)
-        return np.unravel_index(np.argmax(output), self.output_shape)
+        distance_sq = np.sum((self.w - x)**2, axis=-1)
+        return np.unravel_index(np.argmin(distance_sq), self.output_shape)
 
     def h(self, i: tuple[int, int], i0: tuple[int, int], sigma: float) -> float:
         """
