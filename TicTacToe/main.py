@@ -1,5 +1,7 @@
+from cProfile import label
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 from tqdm import trange
 
 from game import TicTacToe
@@ -77,6 +79,8 @@ def train(epochs: int, lr: float, agent1: QAgent = None, agent2: QAgent = None) 
 
     epsilon = 1
 
+    rewards = []
+
     for epoch in trange(epochs):
         reward, game_history = play_game(agent1, agent2, epsilon)
         # Update player 1
@@ -85,8 +89,9 @@ def train(epochs: int, lr: float, agent1: QAgent = None, agent2: QAgent = None) 
         update_q_tables(agent2, game_history[1::2], -reward, lr)
 
         epsilon *= 0.9999
+        rewards.append(reward)
 
-    return agent1, agent2
+    return agent1, agent2, rewards
 
 
 def test_agents(agent1: QAgent, agent2: QAgent, games: int) -> None:
@@ -101,12 +106,29 @@ def test_agents(agent1: QAgent, agent2: QAgent, games: int) -> None:
 
 
 def main():
-    agent1, agent2 = train(epochs=100000, lr=0.1)
+    agent1, agent2, rewards = train(epochs=100000, lr=0.1)
     test_agents(agent1, agent2, 1000)
 
     agent1.save_q_table('player1.csv')
     agent2.save_q_table('player2.csv')
-    # play_game(agent1, agent2, 0, verbose=True)
+
+    # Plot win rates in intervalls of 1000 games
+    rewards = np.array(rewards).reshape(-1, 1000)
+    player1_wins = np.count_nonzero(rewards == 1, axis=1) / 1000
+    player2_wins = np.count_nonzero(rewards == -1, axis=1) / 1000
+    draws = np.count_nonzero(rewards == 0, axis=1) / 1000
+
+    t = np.arange(1, rewards.shape[0] + 1) * 1000
+
+    plt.plot(t, player1_wins, label='Wins player 1')
+    plt.plot(t, player2_wins, label='Wins player 2')
+    plt.plot(t, draws, label='Draws')
+
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(4,4))
+    plt.xlabel('Number of games played')
+    plt.ylabel('Fraction of games won/drawn')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':

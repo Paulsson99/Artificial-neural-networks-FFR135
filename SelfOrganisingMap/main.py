@@ -1,16 +1,23 @@
+from cProfile import label
 import os
 import numpy as np
 import pandas as pd
 from tqdm import trange
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 from map import SelfOrganisingMap
 
 
+flower_map = {
+    0.0 : 'Iris Setosa',
+    1.0 : 'Iris Versicolour',
+    2.0 : 'Iris Virginica',
+}
 color_map = {
-    0.0: (1.0, 0.0, 0.0, 1.0),    # Red
-    1.0: (0.0, 1.0, 0.0, 1.0),    # Green
-    2.0: (0.0, 0.0, 1.0, 1.0),    # Blue
+    'Iris Setosa': (1.0, 0.0, 0.0, 1.0),    # Red
+    'Iris Versicolour': (0.0, 1.0, 0.0, 1.0),    # Green
+    'Iris Virginica': (0.0, 0.0, 1.0, 1.0),    # Blue
 }
 
 
@@ -33,9 +40,10 @@ def plot_colorcoded_data(points: list[tuple[int, int]], labels: np.ndarray, shap
     Plot a time series in 3D
     """
     img = np.zeros((*shape, 4))
-    for label, (x, y) in zip(labels, points):
-        img[x, y] = color_map[label[0]]
-    ax.imshow(img)
+    for (label,), (x, y) in zip(labels, points):
+        flower = flower_map[label]
+        img[x, y] = color_map[flower]
+    ax.imshow(img, origin='lower')
 
 
 def train(som: SelfOrganisingMap, data: np.ndarray, epochs: int):
@@ -60,7 +68,7 @@ def train(som: SelfOrganisingMap, data: np.ndarray, epochs: int):
 
 def main():
     output_shape = (40, 40)
-    epochs = 100
+    epochs = 10
 
     # Load and preprocess data
     iris_data = read_data('iris-data.csv')
@@ -80,6 +88,11 @@ def main():
     fig, (ax1, ax2) = plt.subplots(1, 2)
     plot_colorcoded_data(random_iris_map, iris_labels, output_shape, ax1)
     plot_colorcoded_data(iris_map, iris_labels, output_shape, ax2)
+
+    # Add legend
+    legend_patches = [mpatches.Patch(color=color_map[flower], label=flower) for flower in flower_map.values()]
+    fig.legend(handles=legend_patches, loc='upper center', bbox_to_anchor=(0.5, 0.9), ncol=len(flower_map))
+
     plt.show()
 
 if __name__ == '__main__':
