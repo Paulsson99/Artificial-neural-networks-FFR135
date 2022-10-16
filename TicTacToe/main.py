@@ -108,6 +108,7 @@ def test_agents(agent1: QAgent, agent2: QAgent, games: int) -> None:
 def main():
     agent1, agent2, rewards = train(epochs=100000, lr=0.1)
     test_agents(agent1, agent2, 1000)
+    play_game(agent1, agent2, epsilon=0, verbose=True)
 
     agent1.save_q_table('player1.csv')
     agent2.save_q_table('player2.csv')
